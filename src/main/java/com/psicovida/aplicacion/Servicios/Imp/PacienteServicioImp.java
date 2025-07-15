@@ -1,6 +1,10 @@
 package com.psicovida.aplicacion.Servicios.Imp;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.psicovida.aplicacion.Modelos.PacienteModelo;
 import com.psicovida.aplicacion.Repositorios.PacienteRepositorio;
@@ -25,7 +29,7 @@ public class PacienteServicioImp implements PacienteServicio {
 
     try {
 
-      PacienteModelo pacienteActualizado = pacienteRepositorio.findById(paciente.getIdPaciente()).orElse(null);
+      PacienteModelo pacienteActualizado = pacienteRepositorio.findByNumeroDocumento(paciente.getNumeroDocumento());
       pacienteActualizado.setPrimerNombre(paciente.getPrimerNombre());
       pacienteActualizado.setSegundoNombre(paciente.getSegundoNombre());
       pacienteActualizado.setPrimerApellido(paciente.getPrimerApellido());
@@ -49,14 +53,18 @@ public class PacienteServicioImp implements PacienteServicio {
   }
 
   @Override
-  public PacienteModelo obtenerPaciente(Long id) {
-    return pacienteRepositorio.findById(id).orElse(null);
+  public PacienteModelo obtenerPaciente(String cedula) {
+    return pacienteRepositorio.findByNumeroDocumento(cedula);
   }
 
   @Override
-  public Iterable<PacienteModelo> obtenerPacientes() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'obtenerPacientes'");
+  public List<PacienteModelo> obtenerPacientes() {
+    return pacienteRepositorio.findAll();
+  }
+
+  @Override
+  public Page<PacienteModelo> obtenerPacientesPaginados(Pageable pageable) {
+    return pacienteRepositorio.findAll(pageable);
   }
 
 }

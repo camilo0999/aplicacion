@@ -1,9 +1,12 @@
 package com.psicovida.aplicacion.Servicios.Imp;
 
+import org.springframework.stereotype.Service;
+
 import com.psicovida.aplicacion.Modelos.CitaModelo;
 import com.psicovida.aplicacion.Repositorios.CitaRepositorio;
 import com.psicovida.aplicacion.Servicios.CitaServicio;
 
+@Service
 public class CitasServicioImp implements CitaServicio {
 
   private final CitaRepositorio citaRepositorio;
@@ -14,8 +17,7 @@ public class CitasServicioImp implements CitaServicio {
 
   @Override
   public Iterable<CitaModelo> obtenerCitas() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'obtenerCitas'");
+    return citaRepositorio.findAll();
   }
 
   @Override

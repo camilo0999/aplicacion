@@ -1,6 +1,10 @@
 package com.psicovida.aplicacion.Servicios;
 
+import java.util.List;
+
 import com.psicovida.aplicacion.Modelos.PacienteModelo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PacienteServicio {
 
@@ -10,8 +14,10 @@ public interface PacienteServicio {
 
   public void eliminarPaciente(Long id);
 
-  public PacienteModelo obtenerPaciente(Long id);
+  public PacienteModelo obtenerPaciente(String cedula);
 
-  public Iterable<PacienteModelo> obtenerPacientes();
+  public List<PacienteModelo> obtenerPacientes();
+
+  Page<PacienteModelo> obtenerPacientesPaginados(Pageable pageable);
 
 }
