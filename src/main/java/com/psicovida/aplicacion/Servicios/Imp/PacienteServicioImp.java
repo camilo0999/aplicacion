@@ -9,12 +9,14 @@ import org.springframework.data.domain.Pageable;
 import com.psicovida.aplicacion.Modelos.PacienteModelo;
 import com.psicovida.aplicacion.Repositorios.PacienteRepositorio;
 import com.psicovida.aplicacion.Servicios.PacienteServicio;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class PacienteServicioImp implements PacienteServicio {
 
   private final PacienteRepositorio pacienteRepositorio;
 
+  @Autowired
   public PacienteServicioImp(PacienteRepositorio pacienteRepositorio) {
     this.pacienteRepositorio = pacienteRepositorio;
   }
@@ -67,4 +69,8 @@ public class PacienteServicioImp implements PacienteServicio {
     return pacienteRepositorio.findAll(pageable);
   }
 
+  @Override
+  public PacienteModelo buscarPorDocumento(String documento) {
+    return pacienteRepositorio.findByNumeroDocumento(documento);
+  }
 }

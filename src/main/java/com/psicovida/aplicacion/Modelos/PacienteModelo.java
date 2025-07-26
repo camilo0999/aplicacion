@@ -3,6 +3,8 @@ package com.psicovida.aplicacion.Modelos;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,6 +50,7 @@ public class PacienteModelo {
   private String email;
 
   @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL)
+  @JsonIgnore
   private List<CitaModelo> citas;
 
 }

@@ -20,4 +20,5 @@ public interface PacienteServicio {
 
   Page<PacienteModelo> obtenerPacientesPaginados(Pageable pageable);
 
+  PacienteModelo buscarPorDocumento(String documento);
 }

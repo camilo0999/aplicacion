@@ -2,7 +2,10 @@ package com.psicovida.aplicacion.Modelos;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -44,9 +47,15 @@ public class DoctorModelo {
 
   private String direccion;
 
+  @Column(length = 500)
   private String descripcion;
 
   @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+  @JsonIgnore
   private List<CitaModelo> citas;
+
+  @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<HorarioAtencionModelo> horariosAtencion;
 
 }

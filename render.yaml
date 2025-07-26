@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: psicovida-aplicacion
+    env: docker
+    region: oregon
+    plan: starter
+    healthCheckPath: /actuator/health
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: JAVA_OPTS
+        value: "-Xmx512m -Xms256m"
+    autoDeploy: true
+    buildCommand: docker build -t psicovida-aplicacion .
+    startCommand: java $JAVA_OPTS -jar app.jar

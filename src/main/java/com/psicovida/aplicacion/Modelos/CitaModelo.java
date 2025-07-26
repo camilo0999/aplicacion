@@ -2,7 +2,6 @@ package com.psicovida.aplicacion.Modelos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,28 +39,5 @@ public class CitaModelo {
 
   private LocalTime horaFin;
 
-  private String motivo;
-
-  private String observaciones;
-
   private String estado;
-
-  private String tipoCita;
-
-  private String ubicacion;
-
-  private String creadaPor;
-
-  private LocalDateTime fechaCreacion;
-
-  private LocalDateTime fechaActualizacion;
-
-  private String notasPrivadas;
-
-  private String medioContacto;
-
-  private Boolean confirmada;
-
-  private String motivoCancelacion;
-
 }

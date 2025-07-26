@@ -1,0 +1,138 @@
+# Configuración para AWS Lambda con imagen Docker
+# Este archivo define la configuración para desplegar la aplicación en AWS Lambda
+
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Aplicación Psicovida - Lambda con imagen Docker"
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: "prod"
+    Description: "Nombre del ambiente"
+
+  ImageUri:
+    Type: String
+    Description: "URI de la imagen Docker en ECR"
+
+  DatabaseUrl:
+    Type: String
+    Description: "URL de conexión a la base de datos"
+
+  DatabaseUsername:
+    Type: String
+    Description: "Usuario de la base de datos"
+
+  DatabasePassword:
+    Type: String
+    NoEcho: true
+    Description: "Contraseña de la base de datos"
+
+Resources:
+  # Rol de ejecución para Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "psicovida-lambda-role-${EnvironmentName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DatabaseAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rds:DescribeDBInstances
+                  - rds:DescribeDBClusters
+                Resource: "*"
+
+  # Función Lambda
+  PsicovidaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "psicovida-app-${EnvironmentName}"
+      PackageType: Image
+      Code:
+        ImageUri: !Ref ImageUri
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 900
+      MemorySize: 1024
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DatabaseUrl
+          DATABASE_USERNAME: !Ref DatabaseUsername
+          DATABASE_PASSWORD: !Ref DatabasePassword
+          SPRING_PROFILES_ACTIVE: "aws"
+          JAVA_OPTS: "-Xmx512m -Xms256m"
+      ReservedConcurrencyLimit: 10
+
+  # API Gateway
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "psicovida-api-${EnvironmentName}"
+      Description: "API Gateway para aplicación Psicovida"
+
+  # Recurso raíz
+  ApiGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: "{proxy+}"
+
+  # Método ANY para proxy
+  ApiGatewayMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PsicovidaFunction.Arn}/invocations"
+
+  # Permiso para que API Gateway invoque Lambda
+  ApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PsicovidaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/{proxy+}"
+
+  # Deployment
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: ApiGatewayMethod
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: !Ref EnvironmentName
+
+Outputs:
+  FunctionName:
+    Description: "Nombre de la función Lambda"
+    Value: !Ref PsicovidaFunction
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionName"
+
+  ApiGatewayUrl:
+    Description: "URL del API Gateway"
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiGatewayUrl"
+
+  LambdaArn:
+    Description: "ARN de la función Lambda"
+    Value: !GetAtt PsicovidaFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-LambdaArn"
